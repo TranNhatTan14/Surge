@@ -1,6 +1,6 @@
 let body = JSON.parse($response.body)
 
-body.items["user"] = {
+body["user"] = {
         "is_on_free_trial": false,
         "can_purchase": false,
         "subscription_expiration_date_epoch": 7956915742,
