@@ -1,7 +1,6 @@
 let body = JSON.parse($response.body)
 
-body = {
-    "user": {
+body.items["user"] = {
         "is_on_free_trial": false,
         "can_purchase": false,
         "subscription_expiration_date_epoch": 7956915742,
@@ -11,6 +10,5 @@ body = {
             "store": "App Store"
         },
     },
-}
 
-$done({ body: JSON.stringify(body) })
+$done({body: JSON.stringify(body)})
