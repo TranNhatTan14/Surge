@@ -5,4 +5,4 @@
 hostname = %APPEND% accounts.elevateapp.net
 
 [Script]
-Elevate = type=http-response, pattern=^https://accounts\.elevateapp\.net/api/users\?user\%5Bauthentication.*, requires-body=true, max-size=0, script-path= elevate.js,debug=true
+Elevate = type=http-response, pattern=^https://accounts\.elevateapp\.net/api/users\?user\%5Bauthentication.*, requires-body=true, max-size=0, script-path=https://raw.githubusercontent.com/TranNhatTan14/Surge/main/Scripts/Elevate.js, debug=true
