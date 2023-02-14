@@ -1,0 +1,8 @@
+#!name = Elevate
+#!desc = Lifetime Membership
+
+[MITM]
+hostname = %APPEND% accounts.elevateapp.net
+
+[Script]
+Elevate = type=http-response, pattern=^https://accounts\.elevateapp\.net/api/users\?user\%5Bauthentication.*, requires-body=true, max-size=0, script-path= elevate.js,debug=true
