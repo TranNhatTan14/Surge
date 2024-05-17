@@ -1,0 +1,11 @@
+let body = JSON.parse($response.body);
+
+if ($request.method == "GET") {
+  body["subscriptions"] = [{
+    "expire_at": "21190505",
+    "subscription": "lifetime_membership",
+    "days_to_end": 36469,
+    "created_at": "20190529151809"
+  }];
+  $done({body: JSON.stringify(body)});
+}

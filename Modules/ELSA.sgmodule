@@ -1,0 +1,10 @@
+#!name = ELSA Speak
+#!desc = ELSA Pro Lifetime Member
+
+[MITM]
+hostname = %APPEND% pool.elsanow.io
+
+[Script]
+ELSA-request = type = http-request, script-path = Scripts/elsa-request.js, script-update-interval = 1, pattern = ^https:\/\/pool\.elsanow\.io\/content\/api\/.+\/modules\/download$
+
+ELSA-response = type = http-response, script-path = Scripts/elsa-response.js, script-update-interval = 1, requires-body = true, max-size = 0, pattern = ^https:\/\/pool\.elsanow\.io\/user\/api\/.+\/purchase$
