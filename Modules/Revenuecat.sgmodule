@@ -1,0 +1,8 @@
+#!name= Brilliant
+#!desc= Premium Membership
+
+[MITM]
+hostname = %APPEND% api.revenuecat.com
+
+[Script]
+revenuecat = type = http-response, script-path = Scripts/chess.js, script-update-interval = 1, requires-body = 1, max-size = 0, pattern = ^https:\/\/api\.revenuecat\.com
