@@ -22,6 +22,7 @@ if (typeof $response == "undefined") {
 else if (obj && obj.subscriber) {
 	obj.subscriber.subscriptions = obj.subscriber.subscriptions || {};
 	obj.subscriber.entitlement = obj.subscriber.entitlement || {};
+	
 	for (const i in list) {
 		if (new RegExp(`^${i}`, `i`).test(ua)) {
 			obj.subscriber.subscriptions[list[i].id] = data;
