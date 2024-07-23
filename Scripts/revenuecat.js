@@ -2,11 +2,12 @@
 Script to modify response for subscription-based apps using Surge.
 
 This script modifies the response from the RevenueCat API to unlock premium features for specific apps by spoofing subscription data.
+It now includes CustomerInfo from the Purchases API.
 */
 
 const responseHeaders = {};
 
-const parsedResponseBody = JSON.parse(typeof $response !== "undefined" && $response.body || null);
+let parsedResponseBody = JSON.parse(typeof $response !== "undefined" && $response.body || null);
 
 const userAgent = $request.headers['User-Agent'] || $request.headers['user-agent'];
 
@@ -14,7 +15,7 @@ const appSubscriptions = {
     'VSCO': {name: 'membership', id: 'com.circles.fin.premium.yearly'},
     '1Blocker': {name: 'premium', id: 'blocker.ios.subscription.yearly'},
     'Anybox': {name: 'pro', id: 'cc.anybox.Anybox.annual'},
-	'Brilliant': {name: 'pro', id: 'cc.anybox.Anybox.annual'}
+    'Brilliant': {name: 'pro', id: 'cc.anybox.Anybox.annual'}
 };
 
 const subscriptionData = {
@@ -22,6 +23,15 @@ const subscriptionData = {
     "original_purchase_date": "2020-02-11T07:52:55Z",
     "purchase_date": "2020-02-11T07:52:54Z"
 };
+
+async function getCustomerInfo() {
+    try {
+        return await Purchases.getSharedInstance().getCustomerInfo();
+    } catch (e) {
+        console.error("Error fetching customer info:", e);
+        return null;
+    }
+}
 
 if (typeof $response === "undefined") {
     // Prevent 304 issues by removing etag headers
@@ -43,9 +53,19 @@ if (typeof $response === "undefined") {
         }
     }
 
-    responseHeaders.body = JSON.stringify(parsedResponseBody)
-        .replace(/\"expires_date\":\"\w{4}/g, "\"expires_date\":\"2099")
-        .replace(/\"period_type\":\"\w+\"/g, "\"period_type\":\"active\"");
-}
+    // Add CustomerInfo to the response body
+    getCustomerInfo().then(customerInfo => {
+        if (customerInfo) {
+            parsedResponseBody.customerInfo = customerInfo;
+        }
 
-$done(responseHeaders);
+        responseHeaders.body = JSON.stringify(parsedResponseBody)
+            .replace(/\"expires_date\":\"\w{4}/g, "\"expires_date\":\"2099")
+            .replace(/\"period_type\":\"\w+\"/g, "\"period_type\":\"active\"");
+
+        $done(responseHeaders);
+    });
+
+} else {
+    $done(responseHeaders);
+}
