@@ -5,11 +5,10 @@ This script modifies the response from the RevenueCat API to unlock premium feat
 */
 
 const responseHeaders = {};
+
 const parsedResponseBody = JSON.parse(typeof $response !== "undefined" && $response.body || null);
-console.log(parsedResponseBody)
 
 const userAgent = $request.headers['User-Agent'] || $request.headers['user-agent'];
-console.log(userAgent)
 
 const appSubscriptions = {
     'VSCO': {name: 'membership', id: 'com.circles.fin.premium.yearly'},
@@ -29,7 +28,6 @@ if (typeof $response === "undefined") {
     delete $request.headers["X-RevenueCat-ETag"];
 
     responseHeaders.headers = $request.headers;
-	print(responseHeaders)
 } else if (parsedResponseBody && parsedResponseBody.subscriber) {
     parsedResponseBody.subscriber.subscriptions = parsedResponseBody.subscriber.subscriptions || {};
     parsedResponseBody.subscriber.entitlement = parsedResponseBody.subscriber.entitlement || {};
