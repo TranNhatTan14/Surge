@@ -13,7 +13,8 @@ const userAgent = $request.headers['User-Agent'] || $request.headers['user-agent
 const appSubscriptions = {
     'VSCO': {name: 'membership', id: 'com.circles.fin.premium.yearly'},
     '1Blocker': {name: 'premium', id: 'blocker.ios.subscription.yearly'},
-    'Anybox': {name: 'pro', id: 'cc.anybox.Anybox.annual'}
+    'Anybox': {name: 'pro', id: 'cc.anybox.Anybox.annual'},
+	'Brilliant': {name: 'pro', id: 'cc.anybox.Anybox.annual'}
 };
 
 const subscriptionData = {
