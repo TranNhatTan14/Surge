@@ -1,37 +1,52 @@
-const resp = {};
-const obj = JSON.parse(typeof $response != "undefined" && $response.body || null);
+/*
+Script to modify response for subscription-based apps using Surge.
 
-const ua = $request.headers['User-Agent'] || $request.headers['user-agent'];
-const list = {
-	'VSCO': { name: 'membership', id: 'com.circles.fin.premium.yearly' },
-	'1Blocker': { name: 'premium', id: 'blocker.ios.subscription.yearly' },
-	'Anybox': { name: 'pro', id: 'cc.anybox.Anybox.annual' }
-};
-const data = {
-	"expires_date": "2099-02-18T07:52:54Z",
-	"original_purchase_date": "2020-02-11T07:52:55Z",
-	"purchase_date": "2020-02-11T07:52:54Z"
+This script modifies the response from the RevenueCat API to unlock premium features for specific apps by spoofing subscription data.
+*/
+
+const responseHeaders = {};
+const parsedResponseBody = JSON.parse(typeof $response !== "undefined" && $response.body || null);
+console.log(parsedResponseBody)
+
+const userAgent = $request.headers['User-Agent'] || $request.headers['user-agent'];
+console.log(userAgent)
+
+const appSubscriptions = {
+    'VSCO': {name: 'membership', id: 'com.circles.fin.premium.yearly'},
+    '1Blocker': {name: 'premium', id: 'blocker.ios.subscription.yearly'},
+    'Anybox': {name: 'pro', id: 'cc.anybox.Anybox.annual'}
 };
 
-if (typeof $response == "undefined") {
-	delete $request.headers["x-revenuecat-etag"]; // prevent 304 issues
-	delete $request.headers["X-RevenueCat-ETag"];
-	resp.headers = $request.headers;
+const subscriptionData = {
+    "expires_date": "2099-02-18T07:52:54Z",
+    "original_purchase_date": "2020-02-11T07:52:55Z",
+    "purchase_date": "2020-02-11T07:52:54Z"
+};
+
+if (typeof $response === "undefined") {
+    // Prevent 304 issues by removing etag headers
+    delete $request.headers["x-revenuecat-etag"];
+    delete $request.headers["X-RevenueCat-ETag"];
+
+    responseHeaders.headers = $request.headers;
+	print(responseHeaders)
+} else if (parsedResponseBody && parsedResponseBody.subscriber) {
+    parsedResponseBody.subscriber.subscriptions = parsedResponseBody.subscriber.subscriptions || {};
+    parsedResponseBody.subscriber.entitlement = parsedResponseBody.subscriber.entitlement || {};
+
+    for (const app in appSubscriptions) {
+        if (new RegExp(`^${app}`, `i`).test(userAgent)) {
+            parsedResponseBody.subscriber.subscriptions[appSubscriptions[app].id] = subscriptionData;
+            parsedResponseBody.subscriber.entitlements[appSubscriptions[app].name] = JSON.parse(JSON.stringify(subscriptionData));
+            parsedResponseBody.subscriber.entitlements[appSubscriptions[app].name].product_identifier = appSubscriptions[app].id;
+
+            break;
+        }
+    }
+
+    responseHeaders.body = JSON.stringify(parsedResponseBody)
+        .replace(/\"expires_date\":\"\w{4}/g, "\"expires_date\":\"2099")
+        .replace(/\"period_type\":\"\w+\"/g, "\"period_type\":\"active\"");
 }
 
-else if (obj && obj.subscriber) {
-	obj.subscriber.subscriptions = obj.subscriber.subscriptions || {};
-	obj.subscriber.entitlement = obj.subscriber.entitlement || {};
-	
-	for (const i in list) {
-		if (new RegExp(`^${i}`, `i`).test(ua)) {
-			obj.subscriber.subscriptions[list[i].id] = data;
-			obj.subscriber.entitlements[list[i].name] = JSON.parse(JSON.stringify(data));
-			obj.subscriber.entitlements[list[i].name].product_identifier = list[i].id;
-			break;
-		}
-	}
-	resp.body = JSON.stringify(obj).replace(/\"expires_date\":\"\w{4}/g, "\"expires_date\":\"2099").replace(/\"period_type\":\"\w+\"/g, "\"period_type\":\"active\"");
-}
-
-$done(resp);
+$done(responseHeaders);
